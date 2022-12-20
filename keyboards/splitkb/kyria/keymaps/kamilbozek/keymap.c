@@ -62,7 +62,7 @@ U_NP,              U_NP,              LT(U_MEDIA,KC_ESC),LT(U_NAV,KC_SPC),  LT(U
      KC_GRV  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSLS,
      CW_TOGG , LCTL_T(KC_A),  LALT_T(KC_S)   ,  LGUI_T(KC_D)  ,   LSFT_T(KC_F) ,   KC_G ,                                        KC_H,   LSFT_T(KC_J) ,  LGUI_T(KC_K) ,   LALT_T(KC_L) ,LCTL_T(KC_SCLN), KC_QUOT,
      _______ , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B ,  KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, _______,
-                                LT(_MEDIA,KC_ESC) , LT(_NAV,KC_TAB), KC_SPC,     LT(_SYM,KC_ENT)    , LT(_NUM,KC_BSPC) ,LT(_FUN,KC_DEL)
+                                LT(_MEDIA,KC_ESC) , KC_SPC, LT(_NAV,KC_TAB),     LT(_SYM,KC_ENT)    , LT(_NUM,KC_BSPC) ,LT(_FUN,KC_DEL)
     ),
 
 
@@ -137,7 +137,7 @@ U_NP,              U_NP,              KC_APP,            KC_SPC,            KC_T
       _______, KC_F12, KC_F7, KC_F8, KC_F9, KC_PSCR,                                     _______, _______, _______,   _______,  _______, _______,
       _______, KC_F11, KC_F4, KC_F5, KC_F6, KC_SCRL,                                     _______, KC_LSFT, KC_LGUI, KC_LALT, KC_LCTL, _______,
       _______, KC_F10, KC_F1, KC_F2, KC_F3, KC_PAUS,                                     _______, _______, _______, _______, _______, _______,
-                                                   KC_APP, KC_TAB, KC_SPC, _______, _______, _______
+                                                   KC_APP, KC_SPC, KC_TAB, _______, _______, _______
     )
 };
 
