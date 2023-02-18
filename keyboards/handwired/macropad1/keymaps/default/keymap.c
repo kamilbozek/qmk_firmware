@@ -1,12 +1,15 @@
 #include QMK_KEYBOARD_H
 #include <stdio.h>
+#include "print.h"
 
-enum layers {
+enum states {
     _IDLE = 0,
     _FOCUS,
     _RESULT_SUCCESS,
     _RESULT_FAILURE
 };
+
+// TODO: custom keycodes, save state eeprom, don't turn off oled
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
@@ -14,18 +17,63 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * │ START │ CHANGE_TIME │ 3 │
      * └───┴───┴───┘
      */
-    [_IDLE] = LAYOUT_ortho_1x3(
-        TO(_FOCUS),   TO(_RESULT_SUCCESS),   KC_3
-    ),
-    [_FOCUS] = LAYOUT_ortho_1x3(
-        TO(_RESULT_FAILURE),   TO(_RESULT_FAILURE),   KC_3
-    ),
-    [_RESULT_SUCCESS] = LAYOUT_ortho_1x3(
-        TO(_IDLE),   TO(_IDLE),   KC_3
-    ),
-    [_RESULT_FAILURE] = LAYOUT_ortho_1x3(
-        TO(_IDLE),   TO(_IDLE),   KC_3
-    ),
+    [0] = LAYOUT_ortho_1x3(
+        KC_HYPR,   KC_MEH,   KC_3
+    )
+};
+
+# define TIMER_SET_STEP_MILLIS 10000
+
+# define MAX_TARGET_SECONDS 40000
+
+# define RESULT_SCREEN_DURATION 5000
+
+uint32_t timer = 0;
+
+uint32_t target_duration = 10000;
+
+uint8_t current_state = _IDLE;
+
+uint8_t success_count = 0;
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // uprintf("KL: kc: 0x%04X, col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+    
+    if (record->event.pressed) {
+        switch (current_state) {
+            case _IDLE:
+                if (keycode == KC_HYPR) {
+                    uprintf("idle: go to focus\n");
+                    timer = timer_read32();
+                    current_state = _FOCUS;
+                } else if (keycode == KC_MEH) {
+                    uprintf("idle: change duration from: %lu to %lu\n", target_duration, target_duration + TIMER_SET_STEP_MILLIS);
+                    target_duration += TIMER_SET_STEP_MILLIS;
+                }
+                break;
+            case _FOCUS:
+                if (keycode == KC_HYPR || keycode == KC_MEH) {
+                    uprintf("foucs: go to failure\n");
+                    timer = timer_read32();
+                    current_state = _RESULT_FAILURE;
+                }
+                break;
+            case _RESULT_FAILURE:
+                if (keycode == KC_HYPR || keycode == KC_MEH) {
+                    uprintf("failure: go to idle\n");
+                    current_state = _IDLE;
+                }
+                break;
+            case _RESULT_SUCCESS:
+                if (keycode == KC_HYPR || keycode == KC_MEH) {
+                    uprintf("success: go to idle\n");
+                    current_state = _IDLE;
+                }
+                break;
+        }
+    }
+
+    return true;
 };
 
 
@@ -41,46 +89,43 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 # define TAP_SPEED 30
 
 char wpm_str[10];
-uint32_t timer = 0;
 uint8_t current_idle_frame = 0;
 uint8_t current_tap_frame = 0;
 
-# define TIMER_SET_STEP_MILLIS 10000
 
-# define MAX_TARGET_SECONDS 40000
-
-# define RESULT_SCREEN_DURATION 5000
-
-uint32_t target_duration = 10000;
 
 
 static void render_anim(void) {
     oled_set_cursor(0, 0);
-    oled_write_P(PSTR("Layer: "), false);
-        switch (get_highest_layer(layer_state|default_layer_state)) {
-            case _IDLE:
-                oled_write_P(PSTR("IDLE\n"), false);
-                break;
-            case _FOCUS:
+    oled_write_P(PSTR("State: "), false);
+    switch (current_state) {
+        case _IDLE:
+            oled_write_P(PSTR("IDLE\n"), false);
+            break;
+        case _FOCUS:
                 if (timer_elapsed32(timer) > target_duration) {
+                    success_count++;
+                    uprintf("focus: go to success on timeout, count=%u \n", success_count);
                     timer = timer_read32();
-                    layer_move(_RESULT_SUCCESS);
+                    current_state = _RESULT_SUCCESS;
                 } else {
                     oled_write_P(PSTR("FOCUS\n"), false);
                 }
                 break;
             case _RESULT_FAILURE:
                 if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
+                    uprintf("failure: go to idle on timeout\n");
                     timer = timer_read32();
-                    layer_move(_IDLE);
+                    current_state = _IDLE;
                 } else {
                     oled_write_P(PSTR("FAILURE\n"), false);
                 }
                 break;
             case _RESULT_SUCCESS:
                 if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
+                    uprintf("success: go to idle on timeout\n");
                     timer = timer_read32();
-                    layer_move(_IDLE);
+                    current_state = _IDLE;
                 } else {
                     oled_write_P(PSTR("SUCCESS\n"), false);
                 }
