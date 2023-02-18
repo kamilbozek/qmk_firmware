@@ -24,13 +24,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 # define TIMER_SET_STEP_MILLIS 10000
 
-# define MAX_TARGET_SECONDS 40000
+# define TARGET_MAX_MILLIS 40000
 
 # define RESULT_SCREEN_DURATION 5000
 
+# define TARGET_MIN_MILLIS 10000
+
 uint32_t timer = 0;
 
-uint32_t target_duration = 10000;
+uint32_t target_duration = TARGET_MIN_MILLIS;
 
 uint8_t current_state = _IDLE;
 
@@ -53,6 +55,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 } else if (keycode == KC_2) {
                     uprintf("idle: change duration from: %lu to %lu\n", target_duration, target_duration + TIMER_SET_STEP_MILLIS);
                     target_duration += TIMER_SET_STEP_MILLIS;
+                    if (target_duration > TARGET_MAX_MILLIS) {
+                        target_duration = TARGET_MIN_MILLIS;
+                    }
                 }
                 break;
             case _FOCUS:
