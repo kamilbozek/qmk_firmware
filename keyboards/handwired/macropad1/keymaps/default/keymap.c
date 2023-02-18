@@ -36,6 +36,7 @@ uint8_t current_state = _IDLE;
 
 uint8_t success_count = 0;
 
+char success_count_str[8];
 char target_duration_str[8];
 char elapsed_str[8];
 
@@ -58,18 +59,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if (keycode == KC_1 || keycode == KC_2) {
                     uprintf("foucs: go to failure\n");
                     timer = timer_read32();
+                    oled_clear();
                     current_state = _RESULT_FAILURE;
                 }
                 break;
             case _RESULT_FAILURE:
                 if (keycode == KC_1 || keycode == KC_2) {
                     uprintf("failure: go to idle\n");
+                    oled_clear();
                     current_state = _IDLE;
                 }
                 break;
             case _RESULT_SUCCESS:
                 if (keycode == KC_1 || keycode == KC_2) {
                     uprintf("success: go to idle\n");
+                    oled_clear();
                     current_state = _IDLE;
                 }
                 break;
@@ -96,6 +100,11 @@ uint8_t current_idle_frame = 0;
 uint8_t current_tap_frame = 0;
 
 static void render_anim(void) {
+    sprintf(success_count_str, "%u", success_count);
+    oled_set_cursor(0, 4);
+    oled_write_P(PSTR("Successes: "), false);
+    oled_write(success_count_str, false);
+
     oled_set_cursor(0, 0);
     oled_write_P(PSTR("State: "), false);
     switch (current_state) {
@@ -109,40 +118,40 @@ static void render_anim(void) {
             break;
         case _FOCUS:
             oled_write_P(PSTR("FOCUS\n"), false);
-                uint32_t elapsed = timer_elapsed32(timer);
-                sprintf(elapsed_str, "%lu", elapsed / 1000);
-                oled_set_cursor(0, 2);
-                oled_write_P(PSTR("Elapsed: "), false);
-                oled_write(elapsed_str, false);
-                if (elapsed > target_duration) {
-                    success_count++;
-                    uprintf("focus: go to success on timeout, count=%u \n", success_count);
-                    timer = timer_read32();
-                    current_state = _RESULT_SUCCESS;
-                }
-                break;
-            case _RESULT_FAILURE:
-                if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
-                    uprintf("failure: go to idle on timeout\n");
-                    timer = timer_read32();
-                    oled_clear();
-                    current_state = _IDLE;
-                } else {
-                    oled_write_P(PSTR("FAILURE\n"), false);
-                }
-                break;
-            case _RESULT_SUCCESS:
-                if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
-                    uprintf("success: go to idle on timeout\n");
-                    timer = timer_read32();
-                    oled_clear();
-                    current_state = _IDLE;
-                } else {
-                    oled_write_P(PSTR("SUCCESS\n"), false);
-                }
-                break;
-            default:
-                oled_write_P(PSTR("Undefined\n"), false);
+            uint32_t elapsed = timer_elapsed32(timer);
+            sprintf(elapsed_str, "%lu", elapsed / 1000);
+            oled_set_cursor(0, 2);
+            oled_write_P(PSTR("Elapsed: "), false);
+            oled_write(elapsed_str, false);
+            if (elapsed > target_duration) {
+                success_count++;
+                uprintf("focus: go to success on timeout, count=%u \n", success_count);
+                timer = timer_read32();
+                current_state = _RESULT_SUCCESS;
+            }
+            break;
+        case _RESULT_FAILURE:
+            if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
+                uprintf("failure: go to idle on timeout\n");
+                timer = timer_read32();
+                oled_clear();
+                current_state = _IDLE;
+            } else {
+                oled_write_P(PSTR("FAILURE\n"), false);
+            }
+            break;
+        case _RESULT_SUCCESS:
+            if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
+                uprintf("success: go to idle on timeout\n");
+                timer = timer_read32();
+                oled_clear();
+                current_state = _IDLE;
+            } else {
+                oled_write_P(PSTR("SUCCESS\n"), false);
+            }
+            break;
+        default:
+            oled_write_P(PSTR("Undefined\n"), false);
         }
 }
 
