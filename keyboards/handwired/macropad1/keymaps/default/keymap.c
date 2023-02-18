@@ -45,13 +45,13 @@ uint32_t timer = 0;
 uint8_t current_idle_frame = 0;
 uint8_t current_tap_frame = 0;
 
-# define TIMER_SET_STEP_SECONDS 10
+# define TIMER_SET_STEP_MILLIS 10000
 
-# define MAX_TARGET_SECONDS 40
+# define MAX_TARGET_SECONDS 40000
 
-# define RESULT_SCREEN_DURATION 5
+# define RESULT_SCREEN_DURATION 5000
 
-uint32_t target_duration = 0;
+uint32_t target_duration = 10000;
 
 
 static void render_anim(void) {
@@ -62,13 +62,28 @@ static void render_anim(void) {
                 oled_write_P(PSTR("IDLE\n"), false);
                 break;
             case _FOCUS:
-                oled_write_P(PSTR("FOCUS\n"), false);
+                if (timer_elapsed32(timer) > target_duration) {
+                    timer = timer_read32();
+                    layer_move(_RESULT_SUCCESS);
+                } else {
+                    oled_write_P(PSTR("FOCUS\n"), false);
+                }
                 break;
             case _RESULT_FAILURE:
-                oled_write_P(PSTR("FAILURE\n"), false);
+                if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
+                    timer = timer_read32();
+                    layer_move(_IDLE);
+                } else {
+                    oled_write_P(PSTR("FAILURE\n"), false);
+                }
                 break;
             case _RESULT_SUCCESS:
-                oled_write_P(PSTR("SUCCESS\n"), false);
+                if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
+                    timer = timer_read32();
+                    layer_move(_IDLE);
+                } else {
+                    oled_write_P(PSTR("SUCCESS\n"), false);
+                }
                 break;
             default:
                 oled_write_P(PSTR("Undefined\n"), false);
