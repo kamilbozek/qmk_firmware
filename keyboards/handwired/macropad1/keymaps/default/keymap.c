@@ -36,7 +36,8 @@ uint8_t current_state = _IDLE;
 
 uint8_t success_count = 0;
 
-char target_duration_str[5];
+char target_duration_str[8];
+char elapsed_str[8];
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     uprintf("KL: kc: 0x%04X, col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
@@ -94,33 +95,37 @@ char wpm_str[10];
 uint8_t current_idle_frame = 0;
 uint8_t current_tap_frame = 0;
 
-
-
-
 static void render_anim(void) {
     oled_set_cursor(0, 0);
     oled_write_P(PSTR("State: "), false);
     switch (current_state) {
         case _IDLE:
             oled_write_P(PSTR("IDLE\n"), false);
-            sprintf(target_duration_str, "%lu", target_duration);
+            // print in seconds, watch out not to write outside of the array
+            sprintf(target_duration_str, "%lu", target_duration / 1000);
+            oled_set_cursor(0, 1);
             oled_write_P(PSTR("Target: "), false);
             oled_write(target_duration_str, false);
             break;
         case _FOCUS:
-                if (timer_elapsed32(timer) > target_duration) {
+            oled_write_P(PSTR("FOCUS\n"), false);
+                uint32_t elapsed = timer_elapsed32(timer);
+                sprintf(elapsed_str, "%lu", elapsed / 1000);
+                oled_set_cursor(0, 2);
+                oled_write_P(PSTR("Elapsed: "), false);
+                oled_write(elapsed_str, false);
+                if (elapsed > target_duration) {
                     success_count++;
                     uprintf("focus: go to success on timeout, count=%u \n", success_count);
                     timer = timer_read32();
                     current_state = _RESULT_SUCCESS;
-                } else {
-                    oled_write_P(PSTR("FOCUS\n"), false);
                 }
                 break;
             case _RESULT_FAILURE:
                 if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
                     uprintf("failure: go to idle on timeout\n");
                     timer = timer_read32();
+                    oled_clear();
                     current_state = _IDLE;
                 } else {
                     oled_write_P(PSTR("FAILURE\n"), false);
@@ -130,6 +135,7 @@ static void render_anim(void) {
                 if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
                     uprintf("success: go to idle on timeout\n");
                     timer = timer_read32();
+                    oled_clear();
                     current_state = _IDLE;
                 } else {
                     oled_write_P(PSTR("SUCCESS\n"), false);
