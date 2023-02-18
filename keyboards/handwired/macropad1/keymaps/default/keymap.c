@@ -104,61 +104,6 @@ char wpm_str[10];
 uint8_t current_idle_frame = 0;
 uint8_t current_tap_frame = 0;
 
-// static void render_anim(void) {
-//     sprintf(success_count_str, "%u", success_count);
-//     oled_set_cursor(0, 4);
-//     oled_write_P(PSTR("Successes: "), false);
-//     oled_write(success_count_str, false);
-
-//     oled_set_cursor(0, 0);
-//     oled_write_P(PSTR("State: "), false);
-//     switch (current_state) {
-//         case _IDLE:
-//             oled_write_P(PSTR("IDLE\n"), false);
-//             // print in seconds, watch out not to write outside of the array
-//             sprintf(target_duration_str, "%lu", target_duration / 1000);
-//             oled_set_cursor(0, 1);
-//             oled_write_P(PSTR("Target: "), false);
-//             oled_write(target_duration_str, false);
-//             break;
-//         case _FOCUS:
-//             oled_write_P(PSTR("FOCUS\n"), false);
-//             uint32_t elapsed = timer_elapsed32(timer);
-//             sprintf(elapsed_str, "%lu", elapsed / 1000);
-//             oled_set_cursor(0, 2);
-//             oled_write_P(PSTR("Elapsed: "), false);
-//             oled_write(elapsed_str, false);
-//             if (elapsed > target_duration) {
-//                 success_count++;
-//                 uprintf("focus: go to success on timeout, count=%u \n", success_count);
-//                 timer = timer_read32();
-//                 current_state = _RESULT_SUCCESS;
-//             }
-//             break;
-//         case _RESULT_FAILURE:
-//             if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
-//                 uprintf("failure: go to idle on timeout\n");
-//                 timer = timer_read32();
-//                 oled_clear();
-//                 current_state = _IDLE;
-//             } else {
-//                 oled_write_P(PSTR("FAILURE\n"), false);
-//             }
-//             break;
-//         case _RESULT_SUCCESS:
-//             if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
-//                 uprintf("success: go to idle on timeout\n");
-//                 timer = timer_read32();
-//                 oled_clear();
-//                 current_state = _IDLE;
-//             } else {
-//                 oled_write_P(PSTR("SUCCESS\n"), false);
-//             }
-//             break;
-//         default:
-//             oled_write_P(PSTR("Undefined\n"), false);
-//         }
-// }
 
 
 
@@ -444,22 +389,31 @@ uint8_t frame_number = 0;
 
 static void render_image(void) {
     if (timer_elapsed32(sleepy_timer) > SLEEPY_FRAME_DURATION) {
+        oled_set_cursor(0, 0);
         sleepy_timer = timer_read32();
         switch (frame_number) {
             case 0:
                 printf("print frame 0 \n");
+                // oled_set_cursor(0, 2);
+                // oled_write_P(PSTR("frame 0\n"), false);
                 oled_write_raw_P(frame0, sizeof(frame0));
                 break;
             case 1:
                 oled_write_raw_P(frame1, sizeof(frame1));
+                // oled_set_cursor(0, 2);
+                // oled_write_P(PSTR("frame 1\n"), false);
                 printf("print frame 1 \n");
                 break;
             case 2:
                 oled_write_raw_P(frame2, sizeof(frame2));
+                // oled_set_cursor(0, 2);
+                // oled_write_P(PSTR("frame 2\n"), false);
                 printf("print frame 2 \n");
                 break;
             case 3:
                 oled_write_raw_P(frame3, sizeof(frame3));
+                // oled_set_cursor(0, 2);
+                // oled_write_P(PSTR("frame 3\n"), false);
                 printf("print frame 3 \n");
                 break;
         }
@@ -492,11 +446,69 @@ static void render_image(void) {
 //     }
 // }
 
+static void render_anim(void) {
+    // sprintf(success_count_str, "%u", success_count);
+    // oled_set_cursor(0, 4);
+    // oled_write_P(PSTR("Successes: "), false);
+    // oled_write(success_count_str, false);
+
+    // oled_set_cursor(0, 0);
+    // oled_write_P(PSTR("State: "), false);
+    switch (current_state) {
+        case _IDLE:
+            oled_write_P(PSTR("IDLE\n"), false);
+            // print in seconds, watch out not to write outside of the array
+            sprintf(target_duration_str, "%lu", target_duration / 1000);
+            oled_set_cursor(0, 1);
+            oled_write_P(PSTR("Target: "), false);
+            oled_write(target_duration_str, false);
+            break;
+        case _FOCUS:
+            // oled_write_P(PSTR("FOCUS\n"), false);
+            uint32_t elapsed = timer_elapsed32(timer);
+            // sprintf(elapsed_str, "%lu", elapsed / 1000);
+            // oled_set_cursor(0, 2);
+            // oled_write_P(PSTR("Elapsed: "), false);
+            // oled_write(elapsed_str, false);
+            if (elapsed > target_duration) {
+                success_count++;
+                uprintf("focus: go to success on timeout, count=%u \n", success_count);
+                timer = timer_read32();
+                current_state = _RESULT_SUCCESS;
+            } else {
+                render_image();
+            }
+            break;
+        case _RESULT_FAILURE:
+            if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
+                uprintf("failure: go to idle on timeout\n");
+                timer = timer_read32();
+                oled_clear();
+                current_state = _IDLE;
+            } else {
+                oled_write_P(PSTR("FAILURE\n"), false);
+            }
+            break;
+        case _RESULT_SUCCESS:
+            if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
+                uprintf("success: go to idle on timeout\n");
+                timer = timer_read32();
+                oled_clear();
+                current_state = _IDLE;
+            } else {
+                oled_write_P(PSTR("SUCCESS\n"), false);
+            }
+            break;
+        default:
+            oled_write_P(PSTR("Undefined\n"), false);
+        }
+}
+
 oled_rotation_t oled_init_user(oled_rotation_t rotation) { return OLED_ROTATION_180; }
 
 bool oled_task_user(void) {
-    // render_anim();
-    render_image();
+    render_anim();
+    // render_image();
         // render_animation();  // renders pixelart
 
         // oled_set_cursor(0, 6);                            // sets cursor to (row, column) using charactar spacing (5 rows on 128x32 screen, anything more will overflow back to the top)
