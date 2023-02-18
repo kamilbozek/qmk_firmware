@@ -18,7 +18,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * └───┴───┴───┘
      */
     [0] = LAYOUT_ortho_1x3(
-        KC_HYPR,   KC_MEH,   KC_3
+        KC_1,   KC_2,   KC_3
     )
 };
 
@@ -36,36 +36,38 @@ uint8_t current_state = _IDLE;
 
 uint8_t success_count = 0;
 
+char target_duration_str[5];
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    // uprintf("KL: kc: 0x%04X, col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+    uprintf("KL: kc: 0x%04X, col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
     
     if (record->event.pressed) {
         switch (current_state) {
             case _IDLE:
-                if (keycode == KC_HYPR) {
+                if (keycode == KC_1) {
                     uprintf("idle: go to focus\n");
                     timer = timer_read32();
                     current_state = _FOCUS;
-                } else if (keycode == KC_MEH) {
+                } else if (keycode == KC_2) {
                     uprintf("idle: change duration from: %lu to %lu\n", target_duration, target_duration + TIMER_SET_STEP_MILLIS);
                     target_duration += TIMER_SET_STEP_MILLIS;
                 }
                 break;
             case _FOCUS:
-                if (keycode == KC_HYPR || keycode == KC_MEH) {
+                if (keycode == KC_1 || keycode == KC_2) {
                     uprintf("foucs: go to failure\n");
                     timer = timer_read32();
                     current_state = _RESULT_FAILURE;
                 }
                 break;
             case _RESULT_FAILURE:
-                if (keycode == KC_HYPR || keycode == KC_MEH) {
+                if (keycode == KC_1 || keycode == KC_2) {
                     uprintf("failure: go to idle\n");
                     current_state = _IDLE;
                 }
                 break;
             case _RESULT_SUCCESS:
-                if (keycode == KC_HYPR || keycode == KC_MEH) {
+                if (keycode == KC_1 || keycode == KC_2) {
                     uprintf("success: go to idle\n");
                     current_state = _IDLE;
                 }
@@ -101,6 +103,9 @@ static void render_anim(void) {
     switch (current_state) {
         case _IDLE:
             oled_write_P(PSTR("IDLE\n"), false);
+            sprintf(target_duration_str, "%lu", target_duration);
+            oled_write_P(PSTR("Target: "), false);
+            oled_write(target_duration_str, false);
             break;
         case _FOCUS:
                 if (timer_elapsed32(timer) > target_duration) {
