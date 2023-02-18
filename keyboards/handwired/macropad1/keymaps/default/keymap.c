@@ -464,6 +464,8 @@ static void render_image(void) {
                 break;
         }
         frame_number = (frame_number + 1) % 4;
+        oled_set_cursor(0, 0);
+        oled_write_P(PSTR("              Focus!"), false);
     }
 }
 
