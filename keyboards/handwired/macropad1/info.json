@@ -14,7 +14,7 @@
     },
     "matrix_pins": {
         "cols": ["GP3", "GP4", "GP5"],
-        "rows": ["GP2", "GP2", "GP2"]
+        "rows": ["GP2"]
     },
     "processor": "RP2040",
     "url": "",
