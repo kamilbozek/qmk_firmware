@@ -484,32 +484,24 @@ static void render_image(void) {
         switch (frame_number) {
             case 0:
                 printf("print frame 0 \n");
-                // oled_set_cursor(0, 2);
-                // oled_write_P(PSTR("frame 0\n"), false);
                 oled_write_raw_P(frame0, sizeof(frame0));
                 break;
             case 1:
                 oled_write_raw_P(frame1, sizeof(frame1));
-                // oled_set_cursor(0, 2);
-                // oled_write_P(PSTR("frame 1\n"), false);
                 printf("print frame 1 \n");
                 break;
             case 2:
                 oled_write_raw_P(frame2, sizeof(frame2));
-                // oled_set_cursor(0, 2);
-                // oled_write_P(PSTR("frame 2\n"), false);
                 printf("print frame 2 \n");
                 break;
             case 3:
                 oled_write_raw_P(frame3, sizeof(frame3));
-                // oled_set_cursor(0, 2);
-                // oled_write_P(PSTR("frame 3\n"), false);
                 printf("print frame 3 \n");
                 break;
         }
         frame_number = (frame_number + 1) % 4;
-        oled_set_cursor(0, 0);
-        oled_write_P(PSTR("              Focus!"), false);
+        oled_set_cursor(15, 7);
+        oled_write_P(PSTR("Shhh.."), false);
     }
 }
 
@@ -541,7 +533,13 @@ static void render_anim(void) {
                 success_count++;
                 uprintf("focus: go to success on timeout, count=%u \n", success_count);
                 timer = timer_read32();
+
                 oled_clear();
+                oled_set_cursor(0, 0);
+                oled_write_raw_P(frame_happy, sizeof(frame_happy));
+                oled_set_cursor(7, 0);
+                oled_write_P(PSTR("Well done!"), false);
+
                 current_state = _RESULT_SUCCESS;
             } else {
                 render_image();
@@ -553,27 +551,14 @@ static void render_anim(void) {
                 timer = timer_read32();
                 oled_clear();
                 current_state = _IDLE;
-            } else {
-                oled_set_cursor(0, 0);
-                oled_write_raw_P(frame_angry, sizeof(frame_angry));
             }
             break;
         case _RESULT_SUCCESS:
             if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
                 uprintf("success: go to idle on timeout\n");
                 timer = timer_read32();
-                oled_clear();
+                oled_clear(); // TODO rendering init state here
                 current_state = _IDLE;
-            } else {
-                // uprintf("SET CURSOR TO 0\n");
-                // oled_set_cursor(0, 0);
-                // uprintf("CLEAR THE OLED\n");
-                // oled_write_P(PSTR("SUCCESS\n"), false);
-
-                                oled_set_cursor(0, 0);
-                oled_write_raw_P(frame_happy, sizeof(frame_happy));
-                                // oled_set_cursor(0, 0);
-                // oled_write_P(PSTR("     Well done!"), false);
             }
             break;
         default:
@@ -605,9 +590,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if (keycode == KC_1 || keycode == KC_2) {
                     uprintf("foucs: go to failure\n");
                     timer = timer_read32();
+
                     oled_clear();
+                    oled_set_cursor(0, 0);
+                    oled_write_raw_P(frame_angry, sizeof(frame_angry));
+                    oled_set_cursor(4, 4);
+                    oled_write_P(PSTR("You woke me up!"), false);
+
                     current_state = _RESULT_FAILURE;
-                    // render_angry();
                 }
                 break;
             case _RESULT_FAILURE:
