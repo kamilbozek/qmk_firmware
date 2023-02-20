@@ -38,6 +38,8 @@ uint8_t current_state = _IDLE;
 
 uint8_t success_count = 0;
 
+bool initialized = false;
+
 char success_count_str[8];
 char target_duration_str[8];
 char elapsed_str[8];
@@ -505,6 +507,17 @@ static void render_image(void) {
     }
 }
 
+static void render_idle(void) {
+    oled_clear();
+    oled_set_cursor(0, 0);
+    oled_write_P(PSTR("IDLE\n"), false);
+    // print in seconds, watch out not to write outside of the array
+    sprintf(target_duration_str, "%lu", target_duration / 1000);
+    oled_set_cursor(0, 1);
+    oled_write_P(PSTR("Target: "), false);
+    oled_write(target_duration_str, false);
+}
+
 static void render_anim(void) {
     // sprintf(success_count_str, "%u", success_count);
     // oled_set_cursor(0, 4);
@@ -515,12 +528,10 @@ static void render_anim(void) {
     // oled_write_P(PSTR("State: "), false);
     switch (current_state) {
         case _IDLE:
-            oled_write_P(PSTR("IDLE\n"), false);
-            // print in seconds, watch out not to write outside of the array
-            sprintf(target_duration_str, "%lu", target_duration / 1000);
-            oled_set_cursor(0, 1);
-            oled_write_P(PSTR("Target: "), false);
-            oled_write(target_duration_str, false);
+            if (!initialized) {
+                initialized = true;
+                render_idle();
+            }
             break;
         case _FOCUS:
             // oled_write_P(PSTR("FOCUS\n"), false);
@@ -549,7 +560,7 @@ static void render_anim(void) {
             if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
                 uprintf("failure: go to idle on timeout\n");
                 timer = timer_read32();
-                oled_clear();
+                render_idle();
                 current_state = _IDLE;
             }
             break;
@@ -557,7 +568,7 @@ static void render_anim(void) {
             if (timer_elapsed32(timer) > RESULT_SCREEN_DURATION) {
                 uprintf("success: go to idle on timeout\n");
                 timer = timer_read32();
-                oled_clear(); // TODO rendering init state here
+                render_idle();
                 current_state = _IDLE;
             }
             break;
@@ -603,12 +614,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             case _RESULT_FAILURE:
                 if (keycode == KC_1 || keycode == KC_2) {
                     uprintf("failure: go to idle\n");
+                    render_idle();
                     current_state = _IDLE;
                 }
                 break;
             case _RESULT_SUCCESS:
                 if (keycode == KC_1 || keycode == KC_2) {
                     uprintf("success: go to idle\n");
+                    render_idle();
                     current_state = _IDLE;
                 }
                 break;
