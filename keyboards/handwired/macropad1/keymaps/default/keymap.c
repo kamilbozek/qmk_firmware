@@ -780,7 +780,7 @@ static void render_image(void) {
     }
 }
 
-#define PIZZA_FRAME_DURATION 200
+#define PIZZA_FRAME_DURATION 150
 uint32_t pizza_frame_timer = 0;
 uint8_t pizza_frame_number = 0;
 
@@ -822,6 +822,10 @@ static void render_idle(void) {
     oled_write_P(PSTR("(2) Time: "), false);
     oled_write(target_duration_str, false);
     oled_write_P(PSTR("s"), false);
+
+    oled_set_cursor(7, 7);
+    oled_write_P(PSTR("Naps taken: "), false);
+    oled_write(success_count_str, false);
 }
 
 static void render_anim(void) {
@@ -834,10 +838,10 @@ static void render_anim(void) {
     // oled_write_P(PSTR("State: "), false);
     switch (current_state) {
         case _IDLE:
-            // if (!initialized) {
-            //     initialized = true;
-            //     render_idle();
-            // }
+            if (!initialized) {
+                initialized = true;
+                sprintf(success_count_str, "%u", success_count);
+            }
             render_idle();
             break;
         case _FOCUS:
@@ -851,12 +855,17 @@ static void render_anim(void) {
                 success_count++;
                 uprintf("focus: go to success on timeout, count=%u \n", success_count);
                 timer = timer_read32();
+                sprintf(success_count_str, "%u", success_count);
 
                 oled_clear();
                 oled_set_cursor(0, 0);
                 oled_write_raw_P(frame_happy, sizeof(frame_happy));
                 oled_set_cursor(7, 0);
                 oled_write_P(PSTR("Well done!"), false);
+                oled_set_cursor(9, 3);
+                oled_write_P(PSTR("Naps taken:"), false);
+                oled_set_cursor(14, 5);
+                oled_write(success_count_str, false);
 
                 current_state = _RESULT_SUCCESS;
             } else {
