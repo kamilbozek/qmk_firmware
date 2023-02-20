@@ -748,6 +748,7 @@ static const char PROGMEM pizza1[] = {
 
 
 uint32_t sleepy_timer = 0;
+// uint32_t focus_timer = 0;
 uint8_t frame_number = 0;
 
 #define SLEEPY_FRAME_DURATION 300
@@ -758,26 +759,36 @@ static void render_image(void) {
         sleepy_timer = timer_read32();
         switch (frame_number) {
             case 0:
-                printf("print frame 0 \n");
                 oled_write_raw_P(frame0, sizeof(frame0));
                 break;
             case 1:
                 oled_write_raw_P(frame1, sizeof(frame1));
-                printf("print frame 1 \n");
                 break;
             case 2:
                 oled_write_raw_P(frame2, sizeof(frame2));
-                printf("print frame 2 \n");
                 break;
             case 3:
                 oled_write_raw_P(frame3, sizeof(frame3));
-                printf("print frame 3 \n");
                 break;
         }
         frame_number = (frame_number + 1) % 4;
-        oled_set_cursor(15, 7);
+        oled_set_cursor(15, 0);
         oled_write_P(PSTR("Shhh.."), false);
     }
+    uint32_t elapsed_seconds = timer_elapsed32(timer) / 1000;
+    oled_set_cursor(17, 4);
+    sprintf(elapsed_str, "%lu", elapsed_seconds);
+    oled_write(elapsed_str, false);
+    oled_write_P(PSTR("s"), false);
+
+    oled_set_cursor(18, 5);
+    oled_write_P(PSTR("/"), false);
+    oled_set_cursor(17, 6);
+    oled_write(target_duration_str, false);
+    oled_write_P(PSTR("s"), false);
+    // todo: use proper gif images instead of removing text with blanks
+    oled_set_cursor(15, 7);
+    oled_write_P(PSTR("      "), false);
 }
 
 #define PIZZA_FRAME_DURATION 150
@@ -790,25 +801,19 @@ static void render_pizza(void) {
         pizza_frame_timer = timer_read32();
         switch (pizza_frame_number) {
             case 0:
-                printf("print frame 0 \n");
                 oled_write_raw_P(pizza0, sizeof(pizza0));
                 break;
             case 1:
                 oled_write_raw_P(pizza1, sizeof(pizza1));
-                printf("print frame 1 \n");
                 break;
             case 2:
                 oled_write_raw_P(pizza2, sizeof(pizza2));
-                printf("print frame 2 \n");
                 break;
             case 3:
                 oled_write_raw_P(pizza3, sizeof(pizza3));
-                printf("print frame 3 \n");
                 break;
         }
         pizza_frame_number = (pizza_frame_number + 1) % 4;
-        // oled_set_cursor(15, 7);
-        // oled_write_P(PSTR("Shhh.."), false);
     }
 }
 
@@ -847,10 +852,6 @@ static void render_anim(void) {
         case _FOCUS:
             // oled_write_P(PSTR("FOCUS\n"), false);
             uint32_t elapsed = timer_elapsed32(timer);
-            // sprintf(elapsed_str, "%lu", elapsed / 1000);
-            // oled_set_cursor(0, 2);
-            // oled_write_P(PSTR("Elapsed: "), false);
-            // oled_write(elapsed_str, false);
             if (elapsed > target_duration) {
                 success_count++;
                 uprintf("focus: go to success on timeout, count=%u \n", success_count);
