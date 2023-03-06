@@ -34,11 +34,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                              KC_0,              KC_MINS,           U_NA,              U_NA
     ),
 
+
+// symbol layer ideas
+// ` < > " .  & x [ ] %
+// ! - + = #  | : ( ) ?
+// ^ / * \ .  ~ $ { } @
+
+
+// - _ : = () [] {} <> ? ,(base) .(base)
+// ->
+// =>
     [_SYM] = LAYOUT_kamilbozek(
-    KC_LCBR,           KC_AMPR,           KC_ASTR,           KC_LPRN,           KC_RCBR,           U_NA,              U_NA,   U_NA,  U_NA,    U_NA,     \
-    KC_COLN,           KC_DLR,            KC_PERC,           KC_CIRC,           KC_PLUS,           U_NA,              KC_LSFT,           KC_LCTL,           KC_LALT,           KC_LGUI,           \
-    KC_TILD,           KC_EXLM,           KC_AT,             KC_HASH,           KC_PIPE,           U_NA,              U_NA,    U_NA,  KC_ALGR,           U_NA,              \
-                                                             KC_RPRN,           KC_UNDS,           U_NA,              U_NA
+    KC_GRV,            KC_LABK,           KC_RABK,           KC_DQUO,           KC_AMPR,           U_NA,              U_NA,              KC_LBRC,           KC_RBRC,           KC_PERC,     \
+    KC_EXLM,           KC_MINS,           KC_PLUS,           KC_EQL,            KC_HASH,           KC_PIPE,           KC_COLN,           KC_LPRN,           KC_RPRN,           KC_QUES,           \
+    KC_TILD,           KC_SLASH,          KC_ASTR,           KC_BSLS,           KC_DOT,            KC_CIRC,           KC_DLR,            KC_LCBR,           KC_RCBR,           KC_AT,              \
+                                                             KC_UNDS,           KC_MINS,           U_NA,              U_NA
     ),
 
     [_NAV] = LAYOUT_kamilbozek(
@@ -50,8 +60,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_MEDIA] = LAYOUT_kamilbozek(
     U_NA,     U_NA,    U_NA,  U_NA,   U_NA,              RGB_MOD,           RGB_HUI,           RGB_SAI,           RGB_VAI,           RGB_TOG,           \
-    KC_LGUI,           KC_LALT,           KC_LCTL,           KC_LSFT,           U_NA,              KC_MPRV,           KC_VOLD,           KC_VOLU,           KC_MNXT,           U_NU,              \
-    U_NA,              KC_ALGR,           U_NA,    U_NA,  U_NA,              U_NU,              U_NU,              U_NU,              U_NU,              OU_AUTO,           \
-                                                             U_NA,              U_NA,              KC_MSTP,           KC_MPLY
+    KC_LGUI,           KC_LALT,           KC_LCTL,           KC_LSFT,           U_NA,              U_NA,           KC_VOLD,           KC_VOLU,           U_NA,           U_NU,              \
+    U_NA,              KC_ALGR,           U_NA,    U_NA,  U_NA,              U_NU,              U_NU,              U_NU,              U_NU,              U_NU,           \
+                                                             U_NA,              U_NA,              U_NU,           U_NU
     )
 };
