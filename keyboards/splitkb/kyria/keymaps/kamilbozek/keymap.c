@@ -34,15 +34,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                              KC_0,              KC_DOT,            U_NA,              U_NA
     ),
 
-
 // ` < > " & $ @ [ ] %
-// ! - + = # | : ( ) ?
-// ~ / * \ . x x { } ^
+// : - + = ; | ! ( ) ?
+// ~ / * # \ x . { } ^
 //       _ -
     [_SYM] = LAYOUT_kamilbozek(
-    KC_GRV,            KC_LABK,           KC_RABK,           KC_DQUO,           KC_AMPR,           KC_DLR,            KC_AT,            KC_LBRC,           KC_RBRC,           KC_PERC,     \
-    KC_EXLM,           KC_MINS,           KC_PLUS,           KC_EQL,            KC_HASH,           KC_PIPE,           KC_COLN,           KC_LPRN,           KC_RPRN,           KC_QUES,           \
-    KC_TILD,           KC_SLASH,          KC_ASTR,           KC_BSLS,           KC_DOT,            U_NA,              U_NA,              KC_LCBR,           KC_RCBR,           KC_CIRC,              \
+    KC_GRV,            KC_LABK,           KC_RABK,           KC_DQUO,           KC_AMPR,           KC_DLR,            KC_AT,             KC_LBRC,           KC_RBRC,           KC_PERC,     \
+    KC_COLN,           KC_MINS,           KC_PLUS,           KC_EQL,            KC_SCLN,           KC_PIPE,           KC_EXLM,           KC_LPRN,           KC_RPRN,           KC_QUES,           \
+    KC_TILD,           KC_SLASH,          KC_ASTR,           KC_HASH,           KC_BSLS,           U_NA,              KC_DOT,            KC_LCBR,           KC_RCBR,           KC_CIRC,              \
                                                              KC_UNDS,           KC_MINS,           U_NA,              U_NA
     ),
 
