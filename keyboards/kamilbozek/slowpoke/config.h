@@ -18,3 +18,6 @@
 //#define NO_ACTION_LAYER
 //#define NO_ACTION_TAPPING
 //#define NO_ACTION_ONESHOT
+
+/* USB-connected side is 'left' */
+#define MASTER_LEFT
