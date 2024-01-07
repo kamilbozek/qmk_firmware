@@ -15,8 +15,9 @@
         "command": false,
         "console": false,
         "extrakey": true,
-        "mousekey": true,
-        "nkro": true
+        "mousekey": false,
+        "caps_word": true,
+        "nkro": false
     },
     "matrix_pins": {
         "direct": [
